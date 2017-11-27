@@ -1,12 +1,14 @@
 package com.umeng.soexample;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareAPI;
 import com.umeng.socialize.UMShareListener;
 import com.umeng.socialize.bean.SHARE_MEDIA;
 import com.umeng.socialize.media.UMImage;
@@ -18,6 +20,8 @@ import com.umeng.socialize.utils.ShareBoardlistener;
 import java.lang.ref.WeakReference;
 
 public class MainActivity extends Activity implements View.OnClickListener {
+
+    private final static String TAG = MainActivity.class.getSimpleName();
 
     private TextView tvTextView;
 
@@ -34,7 +38,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         mShareListener = new CustomShareListener(this);
         /*增加自定义按钮的分享面板*/
-        mShareAction = new ShareAction(MainActivity.this).setDisplayList(SHARE_MEDIA.WEIXIN, SHARE_MEDIA.WEIXIN_CIRCLE, SHARE_MEDIA.SINA).setShareboardclickCallback(new ShareBoardlistener() {
+        mShareAction = new ShareAction(MainActivity.this).setDisplayList(SHARE_MEDIA.WEIXIN, SHARE_MEDIA.WEIXIN_CIRCLE, SHARE_MEDIA.SINA, SHARE_MEDIA.QQ, SHARE_MEDIA.QZONE).setShareboardclickCallback(new ShareBoardlistener() {
             @Override
             public void onclick(SnsPlatform snsPlatform, SHARE_MEDIA share_media) {
                 if (snsPlatform.mShowWord.equals("umeng_sharebutton_copy")) {
@@ -65,12 +69,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onStart(SHARE_MEDIA platform) {
-
+            android.util.Log.d(TAG, "onStart() called with: platform = [" + platform + "]");
         }
 
         @Override
         public void onResult(SHARE_MEDIA platform) {
-
+            android.util.Log.d(TAG, "onResult() called with: platform = [" + platform + "]");
             if (platform.name().equals("WEIXIN_FAVORITE")) {
                 Toast.makeText(mActivity.get(), platform + " 收藏成功啦", Toast.LENGTH_SHORT).show();
             } else {
@@ -85,6 +89,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onError(SHARE_MEDIA platform, Throwable t) {
+            android.util.Log.d(TAG, "onError() called with: platform = [" + platform + "], t = [" + t + "]");
             if (platform != SHARE_MEDIA.MORE && platform != SHARE_MEDIA.SMS && platform != SHARE_MEDIA.EMAIL && platform != SHARE_MEDIA.FLICKR && platform != SHARE_MEDIA.FOURSQUARE && platform != SHARE_MEDIA.TUMBLR && platform != SHARE_MEDIA.POCKET && platform != SHARE_MEDIA.PINTEREST
 
                     && platform != SHARE_MEDIA.INSTAGRAM && platform != SHARE_MEDIA.GOOGLEPLUS && platform != SHARE_MEDIA.YNOTE && platform != SHARE_MEDIA.EVERNOTE) {
@@ -98,9 +103,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onCancel(SHARE_MEDIA platform) {
-
+            android.util.Log.d(TAG, "onCancel() called with: platform = [" + platform + "]");
             Toast.makeText(mActivity.get(), platform + " 分享取消了", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /** attention to this below ,must add this**/
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
